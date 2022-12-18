@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css"     integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <title>Document</title>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+          <a class="navbar-brand" href="#">School Library</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+              <li class="nav-item">
+                <a class="nav-link" href="index.html">Home</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="students.html">Students</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="borrows.html">Borrow Records</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="books.html">Books</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+    </nav>
+
+    <div class="container mt-3">
+
+      <div class="float-end">
+        <!-- <a href="new_record.html" class="btn btn-primary">
+          <i class="fa fa-plus"></i> New Transaction
+        </a> -->
+
+        <div class="float-end">
+      
+          <!-- Button trigger modal -->
+          <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal">
+            <i class="fa fa-book" aria-hidden="true"></i> &nbsp;&nbsp;Add New Record
+          </button>
+  
+          <!-- Modal -->
+          <div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h1 class="modal-title fs-5" id="createModalLabel"> Add Record</h1>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                
+                  <div class="mb-3">
+                    <label for="student">Student</label>
+                    <select name="student" id="student" class="form-select">
+                      <option value="">Select a student</option>
+                    </select>
+                  </div>
+                  <div class="mb-3">
+                    <label for="name">Book Name</label>
+                    <select name="name" id="name" class="form-select">
+                      <option value="">Select a book</option>
+                    </select>
+                  </div>
+                  <div class="mb-3">
+                    <label for="taken_date">Taken Date</label>
+                    <input type="date" id="taken_date" class="form-control">
+                  </div>
+                  <div class="mb-3">
+                    <label for="return_date">Return Date</label>
+                    <input type="date" id="return_date" class="form-control">
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                  <button type="button" id="save-btn" class="btn btn-primary">Save changes</button>
+                </div>
+              </div>
+            </div>
+          </div>
+  
+  
+        </div>
+      </div>
+
+      <h1>Recently Borrowed Books</h1>
+      <hr>
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Name</th>
+            <th>Author</th>
+            <th>Borrowed By</th>
+            <th>Return Date</th>
+          </tr>
+        </thead>
+        <tbody id="borrows"></tbody>
+      </table>
+
+    </div>
+
+    <script>
+      function getAllRecords() {
+        fetch("http://localhost:8000/api/borrows")
+          .then(response=>{
+            if(response.status==200) {
+              response.json()
+                .then(data=>renderBorrowRecords(data.recent))
+            }
+          })
+      }
+      function renderBorrowRecords(borrows) {
+        const tbody = $("#borrows")
+
+        borrows.forEach((br)=>{
+          const tr = $(document.createElement("tr"))
+
+          tr.append("<td>" + new Date(Date.parse(br.created_at)).toDateString() + "</td>")
+          tr.append("<td>" + br.book.name + "</td>")
+          tr.append("<td>" + br.book.auth_name + "</td>")
+          tr.append("<td>" + br.student.lname + ", " + br.student.fname + "</td>")
+          tr.append("<td>" + new Date(Date.parse(br.return_date)).toDateString() + "</td>")
+          // tr.append("<td class='text-center'><a href='show_transaction.html?id=" + br.id + "' class='btn btn-sm btn-info'><i class='fa fa-eye'></i></a>")
+
+          tbody.append(tr)
+        })
+      }
+
+      function prependTable(borrows) {
+        var tbody = $("#borrows")
+        const tr = $(document.createElement("tr"))
+
+        tr.append("<td class='text-bg-info'>" + new Date(Date.parse(borrows.created_at)).toDateString() + "</td>")
+        tr.append("<td class='text-bg-info'>" + borrows.book.name + "</td>")
+        tr.append("<td class='text-bg-info'>" + borrows.book.auth_name + "</td>")
+        tr.append("<td class='text-bg-info'>" + borrows.student.lname + ", " + borrows.student.fname + "</td>")
+        tr.append("<td class='text-bg-info'>" + new Date(Date.parse(borrows.return_date)).toDateString() + "</td>")
+
+        tbody.prepend(tr)
+      }
+
+      function getStudents() {
+        fetch('http://localhost:8000/api/students')
+          .then(response=>{
+            if(response.status==200) {
+              response.json()
+                .then(data=>renderStudentsSelect(data.students))
+            }
+          })
+      }
+
+      function renderStudentsSelect(students) {
+        const stud = $("#student")
+        students.forEach((s)=>{
+          const opt = $(document.createElement("option"))
+          opt.attr('value', s.id)
+          opt.text(s.lname + ", " + s.fname)
+          stud.append(opt)
+        })
+      }
+
+      function getBooks() {
+        fetch('http://localhost:8000/api/books')
+          .then(response=>{
+            if(response.status==200) {
+              response.json()
+                .then(data=>renderBookSelect(data.books))
+            }
+          })
+      }
+
+      function renderBookSelect(books) {
+        const bk = $("#name")
+        books.forEach((b)=>{
+          const opt = $(document.createElement("option"))
+          opt.attr('value', b.id)
+          opt.text(b.name)
+          bk.append(opt)
+        })
+      }
+
+      function clearForm() {
+        $("#student").val(null)
+        $("#name").val(null)
+        $("#taken_date").val(null)
+        $("#return_date").val(null)
+      }
+
+      $(document).ready(()=>{
+        getAllRecords()
+        getStudents()
+        getBooks()
+
+        $("#save-btn").click(()=>{
+
+        const data = {
+          "stud_id":$("#student").val(),
+          "book_id": $("#name").val(),
+          "taken_date": $("#taken_date").val(),
+          "return_date": $("#return_date").val(),
+        }
+
+        console.log(data)
+
+        fetch("http://localhost:8000/api/borrows",{
+          "credentials":"omit",
+          "method":"POST",
+          "headers": {
+            "Accept":"application/json",
+            "Content-Type":"application/json"
+          },
+          "body": JSON.stringify(data)
+        }).then(request=>{
+          if(request.status==200) {
+            request.json()
+              .then(data=>{
+                prependTable(data.recent)
+              })
+          }
+        })
+        clearForm()
+        $("#createModal").modal('hide')
+
+        })
+      })
+    </script>
+</body>
+</html>

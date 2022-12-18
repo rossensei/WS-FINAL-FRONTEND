@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css"     integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <title>Document</title>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+          <a class="navbar-brand" href="#">School Library</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+              <li class="nav-item">
+                <a class="nav-link" href="index.html">Home</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="students.html">Students</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="borrows.html">Borrow Records</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="books.html">Books</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+    </nav>
+
+    <div class="container">
+
+        <!-- Breadcrumb -->
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb mt-2">
+            <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+            <li class="breadcrumb-item"><a href="books.html">Books</a></li>
+            <li class="breadcrumb-item active" aria-current="page">View Item | <span class="name"></span></li>
+          </ol>
+        </nav>
+  
+        <div class="bg-light rounded" style="color: rgb(31, 30, 30);">
+
+          <h1 class="name mt-3 text-uppercase" style="margin-left: 25px;"></h1>
+        </div>
+        <hr>
+        <div class="row">
+          <div class="col-md-4">
+            <div class="bg-info text-white text-center rounded">
+
+              <h3 style="padding: 10px 0px 10px;">Book Information</h3>
+            </div>
+  
+            <div class="mb-3">
+              <label for="name">Name</label>
+              <input type="text" id="name" class="form-control">
+            </div>
+            
+            <div class="mb-3">
+              <label for="pagecount">Page Count</label>
+              <input type="text" id="pagecount" class="form-control">
+            </div>
+  
+            <div class="mb-3">
+              <label for="auth_name">Author</label>
+              <input type="text" id="auth_name" class="form-control">
+            </div>
+  
+            <div class="mb-3">
+              <label for="type">Type</label>
+              <input type="text" id="type" class="form-control">
+            </div>
+  
+            <!-- <div class="mb-3">
+              <label for="name">Units</label>
+              <select name="units" id="units" class="form-select">
+              </select>
+            </div> -->
+  
+            <div class="d-flex">
+              <button class="btn btn-primary me-2" id="save_btn">
+                <i class="fa fa-save"></i> Save
+              </button>
+  
+              <!-- Button trigger modal -->
+              <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                <i class="fa fa-trash"></i> Remove
+              </button>
+  
+              <!-- Modal -->
+              <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h1 class="modal-title fs-5" id="deleteModalLabel">Delete Item?</h1>
+                      <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    
+                    <div class="modal-body">
+                      
+                      <div class="alert alert-danger">
+                        Are you sure you want to delete this item?
+                      </div>
+  
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                      <button type="button" class="btn btn-danger" id="confirm_delete_item">Delete</button>
+                    </div>
+                    </form>
+                  </div>
+                </div>
+              </div>
+  
+            </div>
+  
+          </div>
+          <div class="col-md-8">
+            <div class="bg-success text-white text-center rounded">
+              <h3 style="padding: 10px 0px 10px;">Borrow History</h3>
+
+            </div>
+  
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Student #</th>
+                  <th>Date Taken</th>
+                  <th>Return Date</th>
+                  <!-- <th class="text-end">Subtotal</th> -->
+                </tr>
+              </thead>
+              <tbody id="borrows"></tbody>
+            </table>
+          </div>
+        </div>
+  
+    </div>
+
+    <script>
+        function getBook(id) {
+          fetch('http://localhost:8000/api/books/' + id)
+            .then(response=>{
+              if(response.status==200) {
+                response.json()
+                  .then(data=>renderStudent(data))
+              }
+            })
+        }
+
+        function renderStudent(book) {
+          $(".name").text(book.name)
+          $("#name").val(book.name)
+          $("#pagecount").val(book.pagecount)
+          $("#auth_name").val(book.auth_name)
+          $("#type").val(book.type)
+
+          //render transaction History
+          const tbody = $("#borrows")
+  
+          book.borrows.forEach((t)=>{
+            const tr = $(document.createElement("tr"))
+            tr.append("<td>" + t.stud_id + "</td>")
+            tr.append("<td>" + new Date(Date.parse(t.created_at)).toDateString() + "</td>")
+            tr.append("<td>" + new Date(Date.parse(t.return_date)).toDateString() + "</td>")
+            // tr.append("<td class='text-end'>" + t.totalAmount.toFixed(2) + "</td>")
+  
+            tbody.append(tr)
+          })
+        }
+
+        $(document).ready(()=>{
+            const urlParams = new URLSearchParams(window.location.search);
+            const param_id = urlParams.get('id');
+
+            getBook(param_id)
+
+          
+            $("#save_btn").click(()=>{
+            const data = {
+              "name":$("#name").val(),
+              "pagecount":$("#pagecount").val(),
+              "auth_name":$("#auth_name").val(),
+              "type":$("#type").val(),
+            }
+            fetch('http://localhost:8000/api/books/' + param_id,{
+              credentials: "omit",
+              method:"PUT",
+              body: JSON.stringify(data),
+              headers : {
+                "Accept":"application/json",
+                "Content-Type":"application/json"
+              }
+            })
+            .then(response=>{
+              if(response.status==200) {
+                alert('The book information has been updated.')
+                window.location = 'books.html'
+              }
+            })
+          })
+
+          $("#confirm_delete_item").click(()=>{
+          $("#deleteModal").modal('hide')
+
+          fetch('http://localhost:8000/api/books/' + param_id,{
+            credentials: "omit",
+            method:"DELETE",
+            headers:{
+              "Accept":"application/json",
+            }
+          })
+          .then(response=>{
+            if(response.status==200){
+              alert('Book has been deleted.')
+              window.location = 'books.html'
+            }
+
+            if(response.status==500) {
+              alert('Cannot delete item. Perhaps this item has existing transactions.')
+            }
+
+          })
+
+          })
+        })
+    </script>
+</body>
+</html>

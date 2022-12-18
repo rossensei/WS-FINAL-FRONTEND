@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css"     integrity="sha512-MV7K8+y+gLIBoVD59lQIYicR65iaqukzvf/nwasF0nqhPay5w/9lJmVM2hMDcnK1OnMGCdVK+iQrJ7lzPJQd1w==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <title>Document</title>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+          <a class="navbar-brand" href="#">School Library</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+              <li class="nav-item">
+                <a class="nav-link" href="index.html">Home</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="students.html">Students</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="borrows.html">Borrow Records</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="books.html">Books</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+    </nav>
+
+    <div class="container mt-3">
+      <div class="float-end">
+      
+        <!-- Button trigger modal -->
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal">
+          <i class="fa fa-book" aria-hidden="true"></i> &nbsp;&nbsp;Add Book
+        </button>
+
+        <!-- Modal -->
+        <div class="modal fade" id="createModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h1 class="modal-title fs-5" id="createModalLabel"> Add Book</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+              
+                <div class="mb-3">
+                  <label for="name">Name</label>
+                  <input type="text" id="name" class="form-control">
+                </div>
+                <div class="mb-3">
+                  <label for="pagecount">Page Count</label>
+                  <input type="number" id="pagecount" class="form-control">
+                </div>
+                <div class="mb-3">
+                  <label for="auth_name">Author</label>
+                  <input type="text" id="auth_name" class="form-control">
+                </div>
+                <div class="mb-3">
+                  <label for="type">Type</label>
+                  <input type="numeric" id="type" class="form-control">
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" id="save-btn" class="btn btn-primary">Save changes</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+      </div>
+      <h1>Books</h1>
+      <hr class="">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Page Count</th>
+            <th>Author</th>
+            <th>Type</th>
+            <th>Date Added</th>
+            <th class="text-center">...</th>
+          </tr>
+        </thead>
+        <tbody id="books"></tbody>
+      </table>
+      
+    </div>
+
+    <script>
+      function getAllBooks() {
+        fetch("http://localhost:8000/api/books")
+          .then(response=>{
+            if(response.status==200) {
+              response.json()
+                .then(data=>{
+                  renderTable(data.books)
+                })
+            }
+          })
+      }
+
+      function renderTable(books) {
+        var tbody = $("#books")
+
+        books.forEach((b)=>{
+          const tr = $(document.createElement("tr"))
+          tr.append("<td>" + b.name + "</td>")
+          tr.append("<td>" + b.pagecount + "</td>")
+          tr.append("<td>" + b.auth_name + "</td>")
+          tr.append("<td>" + b.type + "</td>")
+          tr.append("<td>" + new Date(Date.parse(b.created_at)).toDateString() + "</td>")
+          tr.append("<td class='text-center'><a class='btn btn-info btn-sm' href='show_book.html?id=" + b.id + "'><i class='fa fa-eye' aria-hidden='true'></i></a>" + " " + "</td>")
+
+          tbody.append(tr)
+        })
+      }
+
+      function prependTable(b) {
+        var tbody = $("#books")
+        const tr = $(document.createElement("tr"))
+        tr.append("<td class='text-bg-info'>" + b.name + "</td>")
+        tr.append("<td class='text-bg-info'>" + b.pagecount + "</td>")
+        tr.append("<td class='text-bg-info'>" + b.auth_name + "</td>")
+        tr.append("<td class='text-bg-info'>" + b.type + "</td>")
+        tr.append("<td class='text-bg-info'>" + new Date(Date.parse(b.created_at)).toDateString() + "</td>")
+        tr.append("<td class='text-center text-bg-info'><a href='show_book.html?id=" + b.id + "'><i class='fa fa-eye' aria-hidden='true'></i></a></td>")
+
+        tbody.prepend(tr)
+      }
+
+      $(document).ready(()=>{
+
+        getAllBooks()
+
+        $("#save-btn").click(()=>{
+
+        const data = {
+          "name":$("#name").val(),
+          "pagecount": $("#pagecount").val(),
+          "auth_name": $("#auth_name").val(),
+          "type": $("#type").val(),
+        }
+
+        console.log(data)
+
+        fetch("http://localhost:8000/api/books",{
+          "credentials":"omit",
+          "method":"POST",
+          "headers": {
+            "Accept":"application/json",
+            "Content-Type":"application/json"
+          },
+          "body": JSON.stringify(data)
+        }).then(request=>{
+          if(request.status==200) {
+            request.json()
+              .then(data=>{
+                prependTable(data)
+              })
+          }
+        })
+
+        $("#createModal").modal('hide')
+
+        })
+      })
+      
+    </script>
+</body>
+</html>
